@@ -36,7 +36,7 @@ class Car():
         sensor_angle
     '''
 
-    #Attributes to kind of replicate a Pub-sub pattern messaging to request data  
+    # Attributes to kind of replicate a Pub-sub pattern messaging to request data  
     steering_value = 0
     speed_value = 0
     sensor_status = 1
@@ -46,7 +46,7 @@ class Car():
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    #Data format for request
+    # Data format for request
     data_arr = [speed_value, steering_value, image_mode, sensor_status, get_Speed, sensor_angle]
     _data_format = "Speed:{},Steering:{},ImageStatus:{},SensorStatus:{},GetSpeed:{},SensorAngle:{}"
     data_str = _data_format.format(data_arr[0], data_arr[1], data_arr[2], data_arr[3], data_arr[4], data_arr[5])
