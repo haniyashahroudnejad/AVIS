@@ -23,7 +23,7 @@ def maskImage(image):
     maskImage = croppImg(image, mask)
     return maskImage
 
-
+# Draws lines on the zeroes_like of the image
 def displayLines(image, lines):
     line_image = np.zeros_like(image)
 
