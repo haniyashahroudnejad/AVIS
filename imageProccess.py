@@ -117,3 +117,52 @@ def bird_eye_view(frame):
     # Warp the image to get the bird's eye view
     bird_eye = cv2.warpPerspective(frame, M, (width, height))
     cv2.imshow("bird_eye", bird_eye)
+
+    return bird_eye
+
+
+def preprocess_image(image):
+    # Convert to HSV color space
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # Define yellow color range and create a mask
+    lower_yellow = np.array([20, 100, 100])
+    upper_yellow = np.array([30, 255, 255])
+    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+    return mask
+
+def detect_yellow_line(binary_warped):
+    # Identify x and y positions of all nonzero pixels in the image
+    nonzero = binary_warped.nonzero()
+    nonzeroy = np.array(nonzero[0])
+    nonzerox = np.array(nonzero[1])
+    return nonzerox, nonzeroy
+
+def fit_polynomial(x, y):
+    # Fit a second order polynomial
+    fit = np.polyfit(y, x, 2)
+    return fit
+
+def calculate_curvature(image):
+    binary_warped = preprocess_image(image)
+
+    # Detect yellow line
+    x, y = detect_yellow_line(binary_warped)
+
+    # Fit polynomial to the yellow line
+    fit = fit_polynomial(x, y)
+
+    # Calculate curvature
+    y_eval = binary_warped.shape[0] - 1
+
+    # Calculate the radius of curvature
+    curvature = ((1 + (2 * fit[0] * y_eval + fit[1]) ** 2) ** 1.5) / np.abs(2 * fit[0])
+    return curvature
+
+
+def isRoadCurved(curvature):
+    if curvature < 12000:
+        return '<p style="color:red;">sharp bend</p>'    # Sharp bend
+    elif 12000 <= curvature and curvature < 22000:
+        return '<p style="color:blue;">moderate bend</p>'     # Moderate bend
+    else:
+        return '<p style="color:black;">no bend</p>'    # Straight road
