@@ -93,3 +93,4 @@ try:
 
 finally:
     car.stop()
+    car.stop()
