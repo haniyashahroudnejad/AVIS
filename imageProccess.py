@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def canny(image):
@@ -116,7 +117,6 @@ def bird_eye_view(frame):
 
     # Warp the image to get the bird's eye view
     bird_eye = cv2.warpPerspective(frame, M, (width, height))
-    cv2.imshow("bird_eye", bird_eye)
 
     return bird_eye
 
@@ -139,9 +139,15 @@ def detect_yellow_line(binary_warped):
 
 def fit_polynomial(x, y):
     # Fit a second order polynomial
-    fit = np.polyfit(y, x, 2)
+    try:
+        fit = np.polyfit(y, x, 2)
+    except:
+        print("")
     return fit
 
+# Determines the curve radius of the road
+# If it's positive, the road bends right. Otherwise it bends towards the left
+# Pass the bird's-eye image for optimal results
 def calculate_curvature(image):
     binary_warped = preprocess_image(image)
 
@@ -156,13 +162,72 @@ def calculate_curvature(image):
 
     # Calculate the radius of curvature
     curvature = ((1 + (2 * fit[0] * y_eval + fit[1]) ** 2) ** 1.5) / np.abs(2 * fit[0])
+
+    if fit[0] > 0:
+        curvature = -curvature  # Left curve
+
+    
     return curvature
 
 
-def isRoadCurved(curvature):
-    if curvature < 12000:
-        return '<p style="color:red;">sharp bend</p>'    # Sharp bend
-    elif 12000 <= curvature and curvature < 22000:
-        return '<p style="color:blue;">moderate bend</p>'     # Moderate bend
+# Determines the middle line's angle in the image
+# Pass the bird's-eye image for optimal results
+def calculate_angle(image):
+    binary_warped = preprocess_image(image)
+
+    # Detect yellow line
+    x, y = detect_yellow_line(binary_warped)
+
+    # Fit polynomial to the yellow line
+    fit = fit_polynomial(x, y)
+
+    # Calculate curvature
+    y_eval = binary_warped.shape[0] - 1
+
+    curvature = calculate_curvature(image)
+
+    if abs(curvature) > 22000:
+        return 0
+    elif abs(curvature) > 12000:
+        return 0.058 * curvature
+    
+
+    # Calculate the derivative of the polynomial
+    derivative = 2 * fit[0] * y_eval + fit[1]
+    # Calculate the angle in radians
+    angle_rad = np.arctan(derivative)
+    # Convert the angle to degrees
+    angle_deg = np.degrees(angle_rad)
+    return angle_deg
+
+
+def steerFromCurvature(curvature):
+    if abs(curvature) > 20000:
+        return 0
     else:
-        return '<p style="color:black;">no bend</p>'    # Straight road
+        return 0.058 * curvature
+    
+
+# Make a log.md to use this. MD format is used to increase readability of logs with colors
+def logCurvature(curvature):
+    with open('log.md', 'a') as file:
+        if curvature < 12000:
+            file.write(f'<p style="color:red;">{curvature}</p>')    # Sharp bend: red
+        elif 12000 <= curvature and curvature < 22000:
+            file.write(f'<p style="color:blue;">{curvature}</p>' )    # Moderate bend: blue
+        else:
+            file.write(f'<p style="color:black;">{curvature}</p>')    # Straight road: black
+
+
+def autoPassRightObstacle(image, car, time):
+    frame, steering_deg = image_processor(image, 400)
+    print(steering_deg)
+    car.setSpeed(15)
+    Steering -= 70
+    print("Steering", Steering)
+    car.setSteering(Steering)
+    time.sleep(2)
+    Steering += 140
+    car.setSteering(Steering)
+    time.sleep(2)
+    Steering -= 70

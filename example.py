@@ -77,32 +77,14 @@ try:
                     car.setSteering(steering_deg)
 
                 # Showing bird's-eye view:
-                image = bird_eye_view(frame)
+                birdViewImage = bird_eye_view(frame)
                 
                 curvature = calculate_curvature(image)
-                # print(f'Radius of Curvature: {curvature:.2f} meters')
 
                 # Log curvature in log.md
-                with open('log.md', 'a') as file:
-                    file.write(isRoadCurved(curvature))
+                logCurvature(curvature)
 
-
-
-
-                # # Plot the results
-                # ploty = np.linspace(0, binary_warped.shape[0] - 1, binary_warped.shape[0])
-                # fitx = fit[0] * ploty ** 2 + fit[1] * ploty + fit[2]
-
-                # plt.imshow(binary_warped, cmap='gray')
-                # plt.plot(fitx, ploty, color='yellow')
-                # plt.xlim(0, binary_warped.shape[1])
-                # plt.ylim(binary_warped.shape[0], 0)
-                # plt.show()
-
-
-                # ----------------------------------------------------------------------------
-
-
+                cv2.imshow("bird's-eye", birdViewImage)
 
                 # Showing the opencv type image
                 cv2.imshow('frame', frame)
