@@ -15,7 +15,6 @@ car = avisengine.Car()
 
 # Connecting to the server (Simulator)
 car.connect(config.SIMULATOR_IP, config.SIMULATOR_PORT)
-
 # Counter variable
 counter = 0
 Steering = 0
@@ -69,11 +68,11 @@ try:
                     print("Steering", Steering)
                     car.setSteering(Steering)
                 elif ((left_sensor < 600) or middle_sensor < 1000):
-                    frame, steering_deg = image_processor(image, 113)
+                    frame, steering_deg = image_processor(image, 100)
                     car.setSteering(290)
                 else:
                     Steering = 0
-                    frame, steering_deg = image_processor(image, 113)
+                    frame, steering_deg = image_processor(image, 100)
                     car.setSteering(steering_deg)
 
                 # Showing bird's-eye view:
